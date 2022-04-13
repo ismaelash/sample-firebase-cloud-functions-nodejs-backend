@@ -1,4 +1,4 @@
-name: Deploy Firebase Functions to DEV
+name: Deploy Firebase Functions to PROD
 
 on:
   push:
@@ -12,20 +12,17 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       
-      - name: Change node current to node 14
+      - name: Change node current to node
         uses: actions/setup-node@v3
         with:
           node-version: '16'
       
       - name: Setup project for environment current
         run: |
-          ls
+          ls -a
           echo "Install dependecies"
-          yarn
-          echo "Setup project for environment current"
+          npm install
           node deploy.js --secretKeyJwt=${{ secrets.secretKeyJwt }} --bigqueryProjectName=${{ secrets.bigqueryProjectName }} --serviceAccountKeyUrl="${{ secrets.serviceAccountKeyUrl }}"
-          cd ..
-          ls
 
       - name: Download files
         run: |
