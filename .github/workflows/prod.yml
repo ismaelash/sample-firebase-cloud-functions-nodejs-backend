@@ -1,0 +1,45 @@
+name: Deploy Firebase Functions to DEV
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      
+      - name: Change node current to node 14
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Setup project for environment current
+        run: |
+          ls
+          echo "Install dependecies"
+          yarn
+          echo "Setup project for environment current"
+          node deploy.js --secretKeyJwt=${{ secrets.secretKeyJwt }} --bigqueryProjectName=${{ secrets.bigqueryProjectName }} --serviceAccountKeyUrl="${{ secrets.serviceAccountKeyUrl }}"
+          cd ..
+          ls
+
+      - name: Download files
+        run: |
+          cd ..
+          sudo apt install curl
+          curl "${{ secrets.firebaseRcUrl }}" -o .firebaserc
+          curl "${{ secrets.firebaseJsonUrl }}" -o firebase.json
+          ls -a
+
+      - name: Start deploy
+        run: |
+          cd ..
+          mv ./${{ github.event.repository.name }} ./functions
+          npm install -g firebase-tools
+          firebase deploy --only functions --token "${{ secrets.tokenAuthFirebase }}"
+          echo "Post Deploy"
+          mv ./functions ./${{ github.event.repository.name }}
